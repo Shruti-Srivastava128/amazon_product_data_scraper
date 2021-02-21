@@ -8,14 +8,15 @@ Created on Thu Aug 13 21:27:05 2020
 from bs4 import BeautifulSoup
 import requests
 import json
-#import re
 base_url="https://www.amazon.com/"
+
 def repalceAllBadCharacter(testString):
             badChars=['\n','\t','\r',',']
-            testString = ''.join(i for i in testString if not i in badChars) 
-            testString=str(testString)
+            testString = ''.join(i for i in testString if not i in badChars)
             return testString
-input_data="men sunglasses"
+
+input_data = input("Enter the product name you would like to search.")
+
 def amazon_url_of_search_input(search_input):
     search_value_list=[value for value in search_input.split(" ")]
     search_data=''
@@ -25,11 +26,9 @@ def amazon_url_of_search_input(search_input):
         else:
             search_data=search_data+"+"+search_value_list[search_value]
     return base_url+"s?k="+search_data
-parent_url= amazon_url_of_search_input(input_data)
-#print(parent_url)    
-    
-#parent_url=["https://www.amazon.com/s?k=sports+watch&ref=nb_sb_noss_2"]
-parent_url=str(parent_url)
+parent_url= amazon_url_of_search_input(input_data)  
+#print(parent_url) 
+
 def find_no_of_pages(url):
     headers = {
         'dnt': '1',
@@ -46,7 +45,7 @@ def find_no_of_pages(url):
     # Download the page using requests
     print("Downloading %s"%url)
     r = requests.get(url, headers=headers)
-    # Simple check to check if page was blocked (Usually 503)
+    # Simple check to check if page was blocked
     if r.status_code > 500:
         if "To discuss automated access to Amazon data please contact" in r.text:
             print("Page %s was blocked by Amazon. Please try using better proxies\n"%url)
@@ -70,7 +69,8 @@ def find_no_of_pages(url):
         no_of_pages=0
     return no_of_pages
 no_of_pages=find_no_of_pages(parent_url)
-print(no_of_pages)
+#print(no_of_pages)
+
 def get_data(pageNo):
     headers = {
         'dnt': '1',
@@ -88,7 +88,7 @@ def get_data(pageNo):
     url=str(url)
     print("Downloading %s"%url)
     r = requests.get(url, headers=headers)
-    # Simple check to check if page was blocked (Usually 503)
+    # Simple check to check if page was blocked
     if r.status_code > 500:
         if "To discuss automated access to Amazon data please contact" in r.text:
             print("Page %s was blocked by Amazon. Please try using better proxies\n"%url)
@@ -105,8 +105,8 @@ def get_data(pageNo):
     search_page_data= soup.find("div",attrs={'class':'s-main-slot s-result-list s-search-results sg-row'})
     #print(search_page_data)
     data={}
+
     if(search_page_data!=None):
-        #search_page_data= search_page_data.find('span',attrs={'class':'celwidget slot=MAIN template=SEARCH_RESULTS widgetId=search-results'})
         for search_page_data_main_category_item in search_page_data.find_all('div',attrs={'class':'a-section a-spacing-medium'}):
             search_data_main_category_item_img = search_page_data_main_category_item.find('img')
             if(search_data_main_category_item_img!=None):
@@ -114,11 +114,11 @@ def get_data(pageNo):
                 data['img']= search_data_main_category_item_img
             else:
                 search_data_main_category_item_img= None
-            print(search_data_main_category_item_img)
+            #print(search_data_main_category_item_img)
             search_data_main_category_item_url = search_page_data_main_category_item.find('a')
             if search_data_main_category_item_url.has_attr('href'):
                 search_data_main_category_item_url= base_url+search_data_main_category_item_url['href']
-                print(search_data_main_category_item_url)
+                #print(search_data_main_category_item_url)
                 data['url']= search_data_main_category_item_url
             else:
                 search_data_main_category_item_url=None
@@ -134,14 +134,14 @@ def get_data(pageNo):
                 else:
                     search_data_main_category_item_title= None
                     
-            print(search_data_main_category_item_title)
+            #print(search_data_main_category_item_title)
             search_data_main_category_item_price= search_page_data_main_category_item.find('span',class_="a-price")
             if(search_data_main_category_item_price!=None):
                 search_data_main_category_item_price= search_data_main_category_item_price.find('span',class_="a-offscreen").get_text()
                 data['price']= search_data_main_category_item_price
             else:
                 search_data_main_category_item_price= None
-            print(search_data_main_category_item_price)
+            #print(search_data_main_category_item_price)
             search_data_main_category_item_extra_availability_info= search_page_data_main_category_item.find('div',class_='a-row a-size-base a-color-secondary')
             if(search_data_main_category_item_extra_availability_info!=None):
                 search_data_main_category_item_extra_availability_info= search_data_main_category_item_extra_availability_info.find('span')
@@ -152,7 +152,7 @@ def get_data(pageNo):
                     search_data_main_category_item_extra_availability_info= None
             else:
                 search_data_main_category_item_extra_availability_info= None
-            print(search_data_main_category_item_extra_availability_info)
+            #print(search_data_main_category_item_extra_availability_info)
             
             search_data_main_category_item_rating_and_review= search_page_data_main_category_item.find(class_="a-section a-spacing-none a-spacing-top-micro")
             if(search_data_main_category_item_rating_and_review!=None):
@@ -164,7 +164,7 @@ def get_data(pageNo):
                     search_data_main_category_item_ratings=search_data_main_category_item_rating.split(" ")
                     search_data_main_category_item_rating= float(search_data_main_category_item_ratings[0])
                     data['rating']= search_data_main_category_item_rating
-                    print(search_data_main_category_item_rating)
+                    #print(search_data_main_category_item_rating)
                 else:
                     search_data_main_category_item_rating= 0.0
                 search_data_main_category_item_no_of_review = search_data_main_category_item_rating_and_review.find("span",attrs={'class':"a-size-base"})
@@ -175,7 +175,7 @@ def get_data(pageNo):
                     #search_data_main_category_item_no_of_reviews= search_data_main_category_item_no_of_review.split(" ")
                     #search_data_main_category_item_no_of_review = search_data_main_category_item_no_of_reviews[0]
                     search_data_main_category_item_no_of_review= int(repalceAllBadCharacter(search_data_main_category_item_no_of_review))
-                    print(search_data_main_category_item_no_of_review)
+                    #print(search_data_main_category_item_no_of_review)
                     data['no_of_review']= search_data_main_category_item_no_of_review
                 else:
                     search_data_main_category_item_no_of_review=0
